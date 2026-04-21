@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask
 import os
 import threading
 import json
@@ -62,32 +62,19 @@ def extract_valid_numbers(text):
 
 msg_lock = Lock()
 
-# 🔹 CONFIGRATION
-TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID", "5328734113"))
-
 # 🔹 Flask app
 web = Flask(__name__)
-bot = telebot.TeleBot(TOKEN)
-user_state = {}
 
 @web.route('/')
 def home():
     return "Bot is running!"
 
-from flask import request
+# 🔹 CONFIGRATION
+TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "5328734113"))
 
-@web.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
-    json_str = request.get_data().decode("UTF-8")
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
-    return "OK", 200
-
-@web.before_first_request
-def set_webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=f"https://your-app.onrender.com/{TOKEN}")
+bot = telebot.TeleBot(TOKEN)
+user_state = {}
 
 # ============================================================
 # 🔹 GLOBAL DATA (STATS SYSTEM)
@@ -2293,3 +2280,21 @@ def show_vcf_page(chat_id, state):
         bot.edit_message_text(text, chat_id, state["msg_id"], reply_markup=kb)
     except:
         pass
+
+
+# ============================================================
+# 🔹 Run Bot
+# ============================================================
+def run_bot():
+    print("🚀 Bot started")
+
+    bot.remove_webhook()
+    time.sleep(1)
+
+    bot.infinity_polling(skip_pending=True, none_stop=True)
+
+if __name__ == "__main__":
+    threading.Thread(target=run_bot, daemon=True).start()
+
+    port = int(os.getenv("PORT", 5000))
+    web.run(host="0.0.0.0", port=port)
