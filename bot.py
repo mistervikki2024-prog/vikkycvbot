@@ -545,11 +545,11 @@ def handle_text(message):
         return
 
     if text == "My Subscription":
-        if is premium(user_id):
+        if is_premium(user_id):
             bot.send_message(message.chat.id, "💎 Status: PREMIUM 🔓")
         else:
             bot.send_message(message.chat.id, "🔒 Status: FREE USER")
-        return
+            return
 
     # ── STATE CHECK ───────────────────────────────────────────
 
