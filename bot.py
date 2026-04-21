@@ -2295,5 +2295,6 @@ def run_bot():
 threading.Thread(target=run_bot, daemon=True).start()
 
 if __name__ == "__main__":
+    threading.Thread(target=run_bot, daemon=True).start()
     port = int(os.getenv("PORT", 5000))
     web.run(host="0.0.0.0", port=port)
