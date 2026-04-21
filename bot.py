@@ -2286,12 +2286,22 @@ def show_vcf_page(chat_id, state):
 # ============================================================
 def run_bot():
     print("✅ Bot starting with pyTelegramBotAPI...")
+
     if not TOKEN:
         print("❌ BOT_TOKEN missing!")
         return
-    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+
+    try:
+        bot.remove_webhook()
+        time.sleep(1)
+    except Exception as e:
+        print("Webhook remove error:", e)
+
+    bot.infinity_polling(skip_pending=True, none_stop=True)
+
 
 threading.Thread(target=run_bot, daemon=True).start()
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
