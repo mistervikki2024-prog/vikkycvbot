@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 import os
 import threading
 import json
@@ -62,8 +62,14 @@ def extract_valid_numbers(text):
 
 msg_lock = Lock()
 
+# 🔹 CONFIGRATION
+TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "5328734113"))
+
 # 🔹 Flask app
 web = Flask(__name__)
+bot = telebot.TeleBot(TOKEN)
+user_state = {}
 
 @web.route('/')
 def home():
@@ -82,13 +88,6 @@ def webhook():
 def set_webhook():
     bot.remove_webhook()
     bot.set_webhook(url=f"https://your-app.onrender.com/{TOKEN}")
-
-# 🔹 CONFIGRATION
-TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID", "5328734113"))
-
-bot = telebot.TeleBot(TOKEN)
-user_state = {}
 
 # ============================================================
 # 🔹 GLOBAL DATA (STATS SYSTEM)
