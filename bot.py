@@ -409,6 +409,36 @@ def progress_bar(current, total):
     bar = "█" * filled + "░" * (20 - filled)
     return f"{bar} {percent}%"
 
+def is_premium(user_id):
+    data = load_data()
+    return user_id in data.get("premium_users", [])
+
+def add_premium(user_id):
+    data = load_data()
+    if "premium_users" not in data:
+        data["premium_users"] = []
+
+    if user_id not in data["premium_users"]:
+        data["premium_users"].append(user_id)
+        save_data(data)
+
+def remove_premium(user_id):
+    data = load_data()
+    if user_id in data.get("premium_users", []):
+        data["premium_users"].remove(user_id)
+        save_data(data)
+
+@bot.message_handler(commands=["addpremium"])
+def give_premium(message):
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    try:
+        uid = int(message.text.split()[1])
+        add_premium(uid)
+        bot.reply_to(message, "✅ User promoted to premium")
+    except:
+        bot.reply_to(message, "Usage: /addpremium user_id")
 
 # ============================================================
 # 🔹 HELP COMMAND
