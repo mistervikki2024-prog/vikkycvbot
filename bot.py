@@ -253,7 +253,7 @@ def ping_cmd(message):
 🚀 *Performance:* `Stable & Smooth`
 🤖 *Engine:* `VCF Master Core`
 
-👨‍💻 *Owner:* @Vikky_IND
+👨‍💻 *Owner:* @Vikky\_IND
 """
 
     markup = types.InlineKeyboardMarkup()
@@ -301,7 +301,7 @@ def refresh_ping(call):
 🚀 *Performance:* `Stable & Smooth`
 🤖 *Engine:* `VCF Master Core`
 
-👨‍💻 *Owner:* @Vikky_IND
+👨‍💻 *Owner:* @Vikky\_IND
 """
 
     markup = types.InlineKeyboardMarkup()
@@ -360,7 +360,7 @@ def run_animation(uid, name, username, user_id):
 🛠️ BOT INFORMATION
 ━━━━━━━━━━━━━━━━━━━━━━━
 🤖 System  : Advanced VCF Engine  
-👨‍💻 Owner   : @Vikky_IND  
+👨‍💻 Owner   : @Vikky\_IND  
 </blockquote>
 ━━━━━━━━━━━━━━━━━━━━━━━
 📩 Need help? Type → /help  
