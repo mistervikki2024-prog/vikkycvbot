@@ -42,7 +42,7 @@ def build_stats_text(total_users, total_vcf):
 ├ ⚡ *Speed:* `Fast Response`
 └ 🛡 *Security:* `Protected`
 ━━━━━━━━━━━━━━━━━━━━━━
-👨‍💻 *Developed By:* @Vikky_IND
+👨‍💻 *Developed By:* `@Vikky_IND`
 🔄 *Last Updated:* `{get_indian_time()}`
 """
 
@@ -253,7 +253,7 @@ def ping_cmd(message):
 🚀 *Performance:* `Stable & Smooth`
 🤖 *Engine:* `VCF Master Core`
 
-👨‍💻 *Owner:* @Vikky\_IND
+👨‍💻 *Owner:* `@Vikky_IND`
 """
 
     markup = types.InlineKeyboardMarkup()
@@ -301,7 +301,7 @@ def refresh_ping(call):
 🚀 *Performance:* `Stable & Smooth`
 🤖 *Engine:* `VCF Master Core`
 
-👨‍💻 *Owner:* @Vikky\_IND
+👨‍💻 *Owner:* `@Vikky_IND`
 """
 
     markup = types.InlineKeyboardMarkup()
@@ -360,7 +360,7 @@ def run_animation(uid, name, username, user_id):
 🛠️ BOT INFORMATION
 ━━━━━━━━━━━━━━━━━━━━━━━
 🤖 System  : Advanced VCF Engine  
-👨‍💻 Owner   : @Vikky\_IND  
+👨‍💻 Owner   : @Vikky_IND  
 </blockquote>
 ━━━━━━━━━━━━━━━━━━━━━━━
 📩 Need help? Type → /help  
