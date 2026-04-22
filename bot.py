@@ -456,7 +456,7 @@ def run_animation(uid, name, username, user_id):
     msg = bot.send_message(uid, f"<code>{frames[0]}</code>", parse_mode="HTML")
 
     for frame in frames[1:]:
-        time.sleep(0.25)
+        time.sleep(0.15)
         try:
             bot.edit_message_text(
                 f"<code>{frame}</code>",
@@ -1382,7 +1382,7 @@ def handle_txt_input(message, state):
                 pass
 
         state["step"] = "ask_file_name"
-        bot.send_message(message.chat.id, "1️⃣ VCF File Name?\n(Example: Brazil)")
+        bot.send_message(message.chat.id, "1️⃣ VCF File Name?\n(Example: HongKong)")
         return
 
     # 👉 ONLY ONE LOOP
@@ -1407,7 +1407,7 @@ def handle_txt_steps(message, state, user_id):
     if state["step"] == "ask_file_name":
         state["file_name"] = text
         state["step"] = "ask_prefix"
-        bot.send_message(message.chat.id, "2️⃣ Contact Name Prefix?\n(Example: Rule Test)")
+        bot.send_message(message.chat.id, "2️⃣ Contact Name Prefix?\n(Example: Vikky Boss)")
         return
 
     # 2️⃣ PREFIX
@@ -1680,7 +1680,7 @@ def handle_admin_navy(message, state, user_id):
             "🔢 Step 5 • Admin Start Number\n"
             "━━━━━━━━━━━━━━━\n"
             "🔢 Send start number for Admin contacts.\n\n"
-            "⏭ Skip → skip (Default: 1)"
+            "⏭ Skip → /skip (Default: 1)"
         )
         return
 
@@ -1694,7 +1694,7 @@ def handle_admin_navy(message, state, user_id):
             "🔢 Step 6 • Navy Start Number\n"
             "━━━━━━━━━━━━━━━\n"
             "🔢 Send start number for Navy contacts.\n\n"
-            "⏭ Skip → skip (Default: 1)"
+            "⏭ Skip → /skip (Default: 1)"
         )
         return
 
