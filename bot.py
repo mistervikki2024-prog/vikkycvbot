@@ -90,6 +90,7 @@ def is_rate_limited(user_id):
     user_actions[user_id] = actions
     return False
 
+
 # 🔹 Flask app
 web = Flask(__name__)
 
@@ -451,14 +452,14 @@ def handle_caption_toggle(call):
 # 🔹 RUN ANIMATION
 # ============================================================
 def run_animation(uid, name, username, user_id):
-        frames = [
-            "[>_] INITIALIZING SYSTEM...\nEstablishing Secure Connection...\n🟥⬜️⬜️⬜️⬜️⬜️ 10%",
-            "[>_] CONNECTING TO SERVERS...\nAuthorizing Access...\n🟥🟥⬜️⬜️⬜️⬜️ 30%",
-            "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟧🟧🟧⬜️⬜️⬜️ 50%",
-            "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟧🟧🟧🟧⬜️⬜️ 70%",
-            "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟨🟨🟨🟨🟨⬜️ 90%",
-            "[✔] ACCESS GRANTED\nSYSTEM READY\n🟩🟩🟩🟩🟩🟩 100%"
-        ]
+    frames = [
+        "[>_] INITIALIZING SYSTEM...\nEstablishing Secure Connection...\n🟥⬜️⬜️⬜️⬜️⬜️ 10%",
+        "[>_] CONNECTING TO SERVERS...\nAuthorizing Access...\n🟥🟥⬜️⬜️⬜️⬜️ 30%",
+        "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟥🟥🟥⬜️⬜️⬜️ 50%",
+        "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟥🟥🟥🟥⬜️⬜️ 70%",
+        "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟥🟥🟥🟥🟥⬜️ 90%",
+        "[✔] ACCESS GRANTED\nSYSTEM READY\n🟩🟩🟩🟩🟩🟩 100%"
+    ]
 
     msg = bot.send_message(uid, f"<code>{frames[0]}</code>", parse_mode="HTML")
 
