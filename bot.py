@@ -102,7 +102,7 @@ def home():
     return "Bot is running!"
 
 # 🔹 CONFIGRATION
-TOKEN = "8705796335:AAE18jqV0gjuXv54VwAvqM7S4N2vgy4MZ6o"
+TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "5328734113"))
 
 bot = telebot.TeleBot(TOKEN)
