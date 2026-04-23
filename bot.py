@@ -455,16 +455,16 @@ def run_animation(uid, name, username, user_id):
     frames = [
         "[>_] INITIALIZING SYSTEM...\nEstablishing Secure Connection...\n🟥⬜️⬜️⬜️⬜️⬜️ 10%",
         "[>_] CONNECTING TO SERVERS...\nAuthorizing Access...\n🟥🟥⬜️⬜️⬜️⬜️ 30%",
-        "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟥🟥🟥⬜️⬜️⬜️ 50%",
-        "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟥🟥🟥🟥⬜️⬜️ 70%",
-        "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟥🟥🟥🟥🟥⬜️ 90%",
+        "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟧🟧🟧⬜️⬜️⬜️ 50%",
+        "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟧🟧🟧🟧⬜️⬜️ 70%",
+        "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟨🟨🟨🟨🟨⬜️ 90%",
         "[✔] ACCESS GRANTED\nSYSTEM READY\n🟩🟩🟩🟩🟩🟩 100%"
     ]
 
     msg = bot.send_message(uid, f"<code>{frames[0]}</code>", parse_mode="HTML")
 
     for frame in frames[1:]:
-        time.sleep(0.15)
+        time.sleep(0.1)
         try:
             bot.edit_message_text(
                 f"<code>{frame}</code>",
