@@ -78,18 +78,10 @@ last_used = {}
 
 def is_rate_limited(user_id):
     now = time.time()
-    actions = user_actions.get(user_id, [])
-
-    # last 1 second ke actions
-    actions = [t for t in actions if now - t < 1]
-
-    if len(actions) >= 3:
-        return True   # 1 sec me max 3 clicks
-
-    actions.append(now)
-    user_actions[user_id] = actions
+    if user_id in last_used and now - last_used[user_id] < 2:
+        return True
+    last_used[user_id] = now
     return False
-
 
 # 🔹 Flask app
 web = Flask(__name__)
@@ -455,16 +447,16 @@ def run_animation(uid, name, username, user_id):
     frames = [
         "[>_] INITIALIZING SYSTEM...\nEstablishing Secure Connection...\n🟥⬜️⬜️⬜️⬜️⬜️ 10%",
         "[>_] CONNECTING TO SERVERS...\nAuthorizing Access...\n🟥🟥⬜️⬜️⬜️⬜️ 30%",
-        "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟧🟧🟧⬜️⬜️⬜️ 50%",
-        "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟧🟧🟧🟧⬜️⬜️ 70%",
-        "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟨🟨🟨🟨🟨⬜️ 90%",
+        "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟥🟥🟥⬜️⬜️⬜️ 50%",
+        "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟥🟥🟥🟥⬜️⬜️ 70%",
+        "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟥🟥🟥🟥🟥⬜️ 90%",
         "[✔] ACCESS GRANTED\nSYSTEM READY\n🟩🟩🟩🟩🟩🟩 100%"
     ]
 
     msg = bot.send_message(uid, f"<code>{frames[0]}</code>", parse_mode="HTML")
 
     for frame in frames[1:]:
-        time.sleep(0.1)
+        time.sleep(0.15)
         try:
             bot.edit_message_text(
                 f"<code>{frame}</code>",
@@ -716,18 +708,11 @@ def handle_text(message):
         return
 
     if text == "My Subscription":
-        bot.send_message(
-            message.chat.id,
-            """🎉<b>BIG UPDATE: NOW FREE!</b> 🎉
-<blockquote>━━━━━━━━━━━━━━━━━━━━━━━━
-<b>All VIP & Premium features are unlocked for everyone — no subscription needed.</b>
-
-🚀 <b>Enjoy full access to the bot’s advanced tools without limits!</b>
-━━━━━━━━━━━━━━━━━━━━━━━━</blockquote>""",
-            parse_mode="HTML",
-            reply_markup=main_menu()
-        )
-        return
+        if is_premium(user_id):
+            bot.send_message(message.chat.id, "💎 Status: PREMIUM 🔓")
+        else:
+            bot.send_message(message.chat.id, "🔒 Status: FREE USER")
+            return
 
     # ── STATE CHECK ───────────────────────────────────────────
 
