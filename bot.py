@@ -11,6 +11,7 @@ from threading import Lock
 from zoneinfo import ZoneInfo
 from datetime import datetime
 import traceback
+user_actions = {}
 
 
 def safe_execute(func):
@@ -35,6 +36,9 @@ def get_uptime():
     seconds = seconds % 60
     return f"{days}d {hours}h {minutes}m {seconds}s"
 
+# ============================================================
+# 🔹 BUILD STATS
+# ============================================================
 def build_stats_text(total_users, total_vcf):
     return f"""<b>📊 SYSTEM LIVE STATISTICS</b>
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -58,7 +62,6 @@ def build_stats_text(total_users, total_vcf):
 🔄 <b>Last Updated:</b> <code>{get_indian_time()}</code>
 """
 
-
 # ============================================================
 # 🔹 ONLY VALID NUMBER EXTRACTION
 # ============================================================
@@ -78,10 +81,18 @@ last_used = {}
 
 def is_rate_limited(user_id):
     now = time.time()
-    if user_id in last_used and now - last_used[user_id] < 2:
-        return True
-    last_used[user_id] = now
+    actions = user_actions.get(user_id, [])
+
+    # last 1 second ke actions
+    actions = [t for t in actions if now - t < 1]
+
+    if len(actions) >= 3:
+        return True   # 1 sec me max 3 clicks
+
+    actions.append(now)
+    user_actions[user_id] = actions
     return False
+
 
 # 🔹 Flask app
 web = Flask(__name__)
@@ -91,14 +102,16 @@ def home():
     return "Bot is running!"
 
 # 🔹 CONFIGRATION
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = "8705796335:AAE18jqV0gjuXv54VwAvqM7S4N2vgy4MZ6o"
 ADMIN_ID = int(os.getenv("ADMIN_ID", "5328734113"))
 
 bot = telebot.TeleBot(TOKEN)
 user_state = {}
 state_lock = Lock()
 data_lock = Lock()
-
+MAX_THREADS = 20
+current_threads = 0
+thread_lock = Lock()
 
 # ============================================================
 # 🔹 GLOBAL DATA (STATS SYSTEM)
@@ -183,28 +196,34 @@ def main_menu():
 def start(message):
     uid = message.chat.id
 
-#   user save for stats
+    # user save for stats
     data = load_data()
     user_id = message.from_user.id
     if user_id not in data["users"]:
         data["users"].append(user_id)
         save_data(data)
 
-    # 🔹 USER DATA
+    # USER DATA
     user = message.from_user
     name = user.first_name
     username = f"@{user.username}" if user.username else "No Username"
     user_id = user.id
 
-    # 🔥 animation me data pass kar
-    if threading.active_count() < 40:
-        threading.Thread(
-            target=run_animation,
-            args=(uid, name, username, user_id),
-            daemon=True
-            ).start()
-    else:
-        bot.send_message(uid, "⚠️ Server busy, please try again in a few seconds.")
+    # THREAD CONTROL
+    global current_threads
+
+    with thread_lock:
+        if current_threads >= MAX_THREADS:
+            bot.send_message(uid, "⚠️ Server busy, please try again later.")
+            return
+        current_threads += 1
+
+    # START THREAD
+    threading.Thread(
+        target=run_animation,
+        args=(uid, name, username, user_id),
+        daemon=True
+    ).start()
 
 
 @bot.message_handler(content_types=["photo"])
@@ -376,12 +395,15 @@ def refresh_ping(call):
         reply_markup=markup
     )
 
+# ============================================================
+# 🔹 CAPTION COMMAND
+# ============================================================
 @bot.message_handler(commands=["caption"])
 @safe_execute
 def caption_cmd(message):
 
     # 🔥 STEP 1: PHOTO (FIXED CAPTION - NOT EDITABLE)
-    photo = "AgACAgUAAxkBAAIK1Gnop9zvKYD0WzJsbanCmvj9FgkKAAJxEGsbldpIV2RyntpKZm-yAQADAgADeQADOwQ"  # 👈 apni image
+    photo = "AgACAgUAAxkBAAIBKGnpa-xZdcYyqmkfks69UTvf3RKgAAJxEGsbldpIVw5s72O-0jo-AQADAgADeQADOwQ"
 
     bot.send_photo(
         message.chat.id,
@@ -406,11 +428,16 @@ def caption_cmd(message):
     with state_lock:
         user_state[message.from_user.id] = {"caption_msg_id": msg.message_id}
 
+# ============================================================
+# 🔹 HANDLE CAPTION TOGGLE
+# ============================================================
 @bot.callback_query_handler(func=lambda call: call.data in ["cap_on", "cap_off"])
 @safe_execute
 def handle_caption_toggle(call):
+    user_id = call.from_user.id
+    
     if is_rate_limited(user_id):
-        bot.reply_to(message, "⚠️ Slow down! Too many requests.")
+        bot.answer_callback_query(call.id, "⚠️ Slow down! Too many requests.")
         return
 
     settings = load_settings()
@@ -444,36 +471,40 @@ def handle_caption_toggle(call):
 # 🔹 RUN ANIMATION
 # ============================================================
 def run_animation(uid, name, username, user_id):
-    frames = [
-        "[>_] INITIALIZING SYSTEM...\nEstablishing Secure Connection...\n🟥⬜️⬜️⬜️⬜️⬜️ 10%",
-        "[>_] CONNECTING TO SERVERS...\nAuthorizing Access...\n🟥🟥⬜️⬜️⬜️⬜️ 30%",
-        "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟥🟥🟥⬜️⬜️⬜️ 50%",
-        "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟥🟥🟥🟥⬜️⬜️ 70%",
-        "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟥🟥🟥🟥🟥⬜️ 90%",
-        "[✔] ACCESS GRANTED\nSYSTEM READY\n🟩🟩🟩🟩🟩🟩 100%"
-    ]
+    global current_threads
 
-    msg = bot.send_message(uid, f"<code>{frames[0]}</code>", parse_mode="HTML")
+    try:
+        frames = [
+            "[>_] INITIALIZING SYSTEM...\nEstablishing Secure Connection...\n🟥⬜️⬜️⬜️⬜️⬜️ 10%",
+            "[>_] CONNECTING TO SERVERS...\nAuthorizing Access...\n🟥🟥⬜️⬜️⬜️⬜️ 30%",
+            "[>_] BYPASSING FIREWALL...\nDecrypting Modules...\n🟧🟧🟧⬜️⬜️⬜️ 50%",
+            "[>_] LOADING VCF ENGINE...\nOptimizing Performance...\n🟧🟧🟧🟧⬜️⬜️ 70%",
+            "[>_] FINALIZING SETUP...\nLaunching Interface...\n🟨🟨🟨🟨🟨⬜️ 90%",
+            "[✔] ACCESS GRANTED\nSYSTEM READY\n🟩🟩🟩🟩🟩🟩 100%"
+        ]
 
-    for frame in frames[1:]:
-        time.sleep(0.15)
+        msg = bot.send_message(uid, f"<code>{frames[0]}</code>", parse_mode="HTML")
+
+        for frame in frames[1:]:
+            time.sleep(0.1)
+            try:
+                bot.edit_message_text(
+                    f"<code>{frame}</code>",
+                    chat_id=uid,
+                    message_id=msg.message_id,
+                    parse_mode="HTML"
+                )
+            except:
+                pass
+
         try:
-            bot.edit_message_text(
-                f"<code>{frame}</code>",
-                chat_id=uid,
-                message_id=msg.message_id,
-                parse_mode="HTML"
-            )
+            bot.delete_message(uid, msg.message_id)
         except:
             pass
-    try:
-        bot.delete_message(uid, msg.message_id)
-    except:
-        pass
 
-    # 🔥 FINAL PRO WELCOME (DYNAMIC)
-    WELCOME_TEXT = f"""╔════════════════════════╗
-    🔥 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐕𝐂𝐅 𝐌𝐀𝐒𝐓𝐄𝐑 🔥
+        # 🔥 WELCOME
+        WELCOME_TEXT = f"""╔════════════════════════╗
+🔥 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐕𝐂𝐅 𝐌𝐀𝐒𝐓𝐄𝐑 🔥
 ╚════════════════════════╝
 <blockquote>👤 Name : {name}  
 🔗 Username : {username}  
@@ -490,13 +521,16 @@ def run_animation(uid, name, username, user_id):
 👇 Select a service from the menu below
 """
 
-    bot.send_message(
-    uid,
-    WELCOME_TEXT,
-    parse_mode="HTML",
-    reply_markup=main_menu()
-)
+        bot.send_message(
+            uid,
+            WELCOME_TEXT,
+            parse_mode="HTML",
+            reply_markup=main_menu()
+        )
 
+    finally:
+        with thread_lock:
+            current_threads -= 1
 
 # ============================================================
 # 🔹 User State
@@ -650,7 +684,6 @@ def cancel_cmd(message):
     )
 
 
-
 # ============================================================
 # 🔹 TEXT HANDLER (FIXED)
 # ============================================================
@@ -708,11 +741,18 @@ def handle_text(message):
         return
 
     if text == "My Subscription":
-        if is_premium(user_id):
-            bot.send_message(message.chat.id, "💎 Status: PREMIUM 🔓")
-        else:
-            bot.send_message(message.chat.id, "🔒 Status: FREE USER")
-            return
+        bot.send_message(
+            message.chat.id,
+            """🎉<b>BIG UPDATE: NOW FREE!</b> 🎉
+<blockquote>━━━━━━━━━━━━━━━━━━━━━━━━
+<b>All VIP & Premium features are unlocked for everyone — no subscription needed.</b>
+
+🚀 <b>Enjoy full access to the bot’s advanced tools without limits!</b>
+━━━━━━━━━━━━━━━━━━━━━━━━</blockquote>""",
+            parse_mode="HTML",
+            reply_markup=main_menu()
+        )
+        return
 
     # ── STATE CHECK ───────────────────────────────────────────
 
@@ -977,7 +1017,7 @@ def handle_text(message):
             "🆔 Step 1 • New Contact Prefix\n"
             "━━━━━━━━━━━━━━━\n"
             "✏️ Enter the name you want for these contacts.\n\n"
-            "Example: Rule Test"
+            "Example: Vikky Boss"
         )
         return
 
@@ -1582,7 +1622,7 @@ def handle_admin_navy(message, state, user_id):
                 "🖋 Step 3 • Admin Name Prefix\n"
                 "━━━━━━━━━━━━━━━\n"
                 "✏️ Enter Admin contact name.\n\n"
-                "Example: Admin Target"
+                "Example: Admin Alpha"
             )
             return
 
@@ -1646,7 +1686,7 @@ def handle_admin_navy(message, state, user_id):
                 "🖋 Step 3 • Admin Name Prefix\n"
                 "━━━━━━━━━━━━━━━\n"
                 "✏️ What should be the name for Admin contacts?\n\n"
-                "Example: Admin Target"
+                "Example: Admin Alpha"
             )
             return
 
@@ -1666,7 +1706,7 @@ def handle_admin_navy(message, state, user_id):
             "🖋 Step 4 • Navy Name Prefix\n"
             "━━━━━━━━━━━━━━━\n"
             "✏️ Enter the name for Navy contacts.\n\n"
-            "Example: Navy Target"
+            "Example: Navy Alpha"
         )
         return
 
